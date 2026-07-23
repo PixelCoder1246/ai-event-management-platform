@@ -114,6 +114,7 @@ See [`docs/02-workflow-documentation.md`](docs/02-Workflow-Documentation.md) for
 
 - [Problem Analysis](docs/01-Problem-Analysis.md) — business context, stakeholders, pain points, objectives
 - [Workflow Documentation](docs/02-Workflow-Documentation.md) — full node-by-node breakdown, schema reference, and rubric cross-reference for all 5 workflows
+- [Project Presentation](docs/AI-Powered-Event-Management-Platform.pdf) — presentation slides overviewing the system
 
 ## Demo
 
