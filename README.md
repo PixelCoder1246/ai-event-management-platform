@@ -20,6 +20,10 @@ The system uses a hub-and-spoke model: every workflow reads from and writes to a
 
 ![Architecture Diagram](docs/architecture-diagram.png)
 
+![Workflow Interaction Diagram](docs/workflow-interaction-diagram.png)
+
+![Event Participant Lifecycle Diagram](docs/event-participant-lifecycle-diagram.png)
+
 See [`docs/02-workflow-documentation.md`](docs/02-Workflow-Documentation.md) for the full interaction diagram and event-flow timeline.
 
 | Workflow                                       | Trigger                            | Purpose                                                                         |
