@@ -1,0 +1,557 @@
+{
+    "nodes": [
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "nvidia/nemotron-3-ultra-550b-a55b",
+            "mode": "list",
+            "cachedResultName": "nvidia/nemotron-3-ultra-550b-a55b"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "id": "371e660c-ec8d-40ad-9e0e-9d62099c28ab",
+        "name": "OpenAI Chat Model (Sentiment)",
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          4816,
+          2464
+        ],
+        "credentials": {
+          "openAiApi": {
+            "id": "VoVA8wvYZC3wCJBs",
+            "name": "Nvidia API Account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsonSchemaExample": "{\"sentiment\":\"positive\",\"theme\":\"venue logistics\"}"
+        },
+        "id": "778e15ef-74ec-4855-b4d1-100200a30a82",
+        "name": "Sentiment & Theme Parser",
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          4976,
+          2464
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const participants = $('Read Registration & Attendance Data').all().map(i => i.json);\nconst feedback = $('Read Feedback Data').all().map(i => i.json);\nconst ratings = feedback.map(f => Number(f.rating)).filter(r => !isNaN(r));\nconst avgRating = ratings.length ? (ratings.reduce((a, b) => a + b, 0) / ratings.length) : null;\nreturn [{ json: {\n  participantCount: participants.length,\n  feedbackCount: feedback.length,\n  averageRating: avgRating,\n  participants,\n  feedback,\n} }];"
+        },
+        "id": "68093379-e8a4-4afa-a5db-09a87050203c",
+        "name": "Prepare Report Data",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          5024,
+          2672
+        ]
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "nvidia/nemotron-3-ultra-550b-a55b",
+            "mode": "list",
+            "cachedResultName": "nvidia/nemotron-3-ultra-550b-a55b"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "id": "e4843272-436e-4213-9dc1-2475c1e0edaf",
+        "name": "OpenAI Chat Model (Summary)",
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          5328,
+          2896
+        ],
+        "credentials": {
+          "openAiApi": {
+            "id": "VoVA8wvYZC3wCJBs",
+            "name": "Nvidia API Account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=You are an event analytics assistant. Write a concise weekly analytics report for the event organizers based on the data below.\n\nRegistered/attended participants: {{ $json.participantCount }}\nFeedback responses: {{ $json.feedbackCount }}\nAverage rating: {{ $json.averageRating }}\n\nParticipant data (JSON): {{ JSON.stringify($json.participants) }}\nFeedback data with AI sentiment/theme tags (JSON): {{ JSON.stringify($json.feedback) }}\n\nCover: overall attendance vs registration, feedback participation rate, sentiment breakdown, recurring themes, and 2-3 concrete recommendations. Use clear plain-text sections with headings.",
+          "batching": {}
+        },
+        "id": "5fd6d5d0-f531-4618-a591-2e77fe837d32",
+        "name": "AI Generate Analytics Summary1",
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.9,
+        "position": [
+          5248,
+          2672
+        ]
+      },
+      {
+        "parameters": {
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "documentId": {
+            "__rl": true,
+            "value": "1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg",
+            "mode": "list",
+            "cachedResultName": "Master DB",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 1355563599,
+            "mode": "list",
+            "cachedResultName": "Feedback Form Responses",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit#gid=1355563599"
+          },
+          "event": "rowAdded",
+          "options": {}
+        },
+        "id": "f00fe7ce-3118-4c82-8daa-47095bdb8066",
+        "name": "New Feedback Submitted",
+        "type": "n8n-nodes-base.googleSheetsTrigger",
+        "typeVersion": 1,
+        "position": [
+          4352,
+          2240
+        ],
+        "credentials": {
+          "googleSheetsTriggerOAuth2Api": {
+            "id": "x8A5qsjuNOIzsgLu",
+            "name": "Google Sheets Trigger account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks"
+              }
+            ]
+          }
+        },
+        "id": "79becade-3771-448f-925c-f02edbe65db8",
+        "name": "Weekly Report Schedule",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          4352,
+          2672
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "f1",
+                "name": "participant_id",
+                "type": "string",
+                "value": "={{ $json['Email'].toLowerCase().trim() }}-{{ $json['Event'] }}"
+              },
+              {
+                "id": "f2",
+                "name": "rating",
+                "type": "number",
+                "value": "={{ $json['Rating'] }}"
+              },
+              {
+                "id": "f3",
+                "name": "comments",
+                "type": "string",
+                "value": "={{ $json['Comments'] }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "f798b38a-a6b1-4b9f-9ce3-4b3d81aeb0f7",
+        "name": "Normalize Feedback",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          4576,
+          2240
+        ]
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=You are analyzing attendee feedback for an event.\nRating (1-5): {{ $json.rating }}\nComments: {{ $json.comments }}\n\nReturn the overall \"sentiment\" (one of: positive, neutral, negative) and a short \"theme\" (2-4 words) describing the main topic of the comment.",
+          "hasOutputParser": true,
+          "batching": {}
+        },
+        "id": "dd189de6-e068-4512-90a1-c6cd8f646420",
+        "name": "AI Sentiment & Theme Extraction",
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.9,
+        "position": [
+          4800,
+          2240
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg",
+            "mode": "list",
+            "cachedResultName": "Master DB",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 887155128,
+            "mode": "list",
+            "cachedResultName": "Feedback",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit#gid=887155128"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "participant_id": "={{ $('Normalize Feedback').item.json.participant_id }}",
+              "rating": "={{ $('Normalize Feedback').item.json.rating }}",
+              "comments": "={{ $('Normalize Feedback').item.json.comments }}",
+              "sentiment": "={{ $json.output.sentiment }}",
+              "theme": "={{ $json.output.theme }}",
+              "submitted_at": "={{ $now.toISO() }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "participant_id",
+                "displayName": "participant_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "rating",
+                "displayName": "rating",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "comments",
+                "displayName": "comments",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "sentiment",
+                "displayName": "sentiment",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "theme",
+                "displayName": "theme",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "submitted_at",
+                "displayName": "submitted_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "id": "f4794315-a0b4-43c7-9288-6615bf3d2731",
+        "name": "Save Feedback with AI Tags",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          5152,
+          2240
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "GL0ghGche8rSIuhp",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "sanchitkhajuria905@gmail.com",
+          "subject": "=Weekly Event Analytics Report - {{ $now.toFormat(\"MMMM d, yyyy\") }}",
+          "emailType": "text",
+          "message": "={{ $json.text }}",
+          "options": {}
+        },
+        "id": "d5a884b1-5a71-4787-a968-efaed167fce7",
+        "name": "Email Analytics Report to Organizers",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          5600,
+          2672
+        ],
+        "webhookId": "7fca6ba4-8872-466d-a127-19c328327dcd",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "wsbNRgDktILX02bM",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {},
+        "id": "c2168a2b-1520-4b3e-bb48-0ca106136cfe",
+        "name": "Merge Registration + Feedback",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.1,
+        "position": [
+          4800,
+          2672
+        ]
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg",
+            "mode": "list",
+            "cachedResultName": "Master DB",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 887155128,
+            "mode": "list",
+            "cachedResultName": "Feedback",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit#gid=887155128"
+          },
+          "options": {}
+        },
+        "id": "3d3a0843-93b3-455f-b25e-027a61f2a354",
+        "name": "Read Feedback Data",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          4576,
+          2768
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "GL0ghGche8rSIuhp",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg",
+            "mode": "list",
+            "cachedResultName": "Master DB",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 1504097949,
+            "mode": "list",
+            "cachedResultName": "Participants",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit#gid=1504097949"
+          },
+          "options": {}
+        },
+        "id": "61b8d611-e56b-4a43-bcd9-c5d07aa75064",
+        "name": "Read Registration & Attendance Data",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          4576,
+          2576
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "GL0ghGche8rSIuhp",
+            "name": "Google Sheets account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "OpenAI Chat Model (Sentiment)": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Sentiment & Theme Extraction",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Sentiment & Theme Parser": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "AI Sentiment & Theme Extraction",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Report Data": {
+        "main": [
+          [
+            {
+              "node": "AI Generate Analytics Summary1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model (Summary)": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Generate Analytics Summary1",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Generate Analytics Summary1": {
+        "main": [
+          [
+            {
+              "node": "Email Analytics Report to Organizers",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "New Feedback Submitted": {
+        "main": [
+          [
+            {
+              "node": "Normalize Feedback",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Weekly Report Schedule": {
+        "main": [
+          [
+            {
+              "node": "Read Registration & Attendance Data",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Read Feedback Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalize Feedback": {
+        "main": [
+          [
+            {
+              "node": "AI Sentiment & Theme Extraction",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Sentiment & Theme Extraction": {
+        "main": [
+          [
+            {
+              "node": "Save Feedback with AI Tags",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge Registration + Feedback": {
+        "main": [
+          [
+            {
+              "node": "Prepare Report Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Feedback Data": {
+        "main": [
+          [
+            {
+              "node": "Merge Registration + Feedback",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Read Registration & Attendance Data": {
+        "main": [
+          [
+            {
+              "node": "Merge Registration + Feedback",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true,
+      "instanceId": "80a18fb6c2488f0df525cd2aff4ed2775845fb6c0a00bf935d40526e0f9fd7ef"
+    }
+  }

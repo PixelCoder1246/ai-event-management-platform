@@ -1,0 +1,514 @@
+{
+    "nodes": [
+      {
+        "parameters": {
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "documentId": {
+            "__rl": true,
+            "value": "1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg",
+            "mode": "list",
+            "cachedResultName": "Master DB",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Registration",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit#gid=0"
+          },
+          "event": "rowAdded",
+          "options": {}
+        },
+        "id": "2f945098-5411-4b73-9f57-8026688e8770",
+        "name": "New Registration (Google Sheets Trigger)",
+        "type": "n8n-nodes-base.googleSheetsTrigger",
+        "typeVersion": 1,
+        "position": [
+          -896,
+          -16
+        ],
+        "credentials": {
+          "googleSheetsTriggerOAuth2Api": {
+            "id": "x8A5qsjuNOIzsgLu",
+            "name": "Google Sheets Trigger account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a1",
+                "name": "full_name",
+                "type": "string",
+                "value": "={{$json['Full Name']}}"
+              },
+              {
+                "id": "a2",
+                "name": "email",
+                "type": "string",
+                "value": "={{$json['Email'].toLowerCase().trim()}}"
+              },
+              {
+                "id": "a3",
+                "name": "phone",
+                "type": "string",
+                "value": "={{$json['Phone']}}"
+              },
+              {
+                "id": "a4",
+                "name": "event_id",
+                "type": "string",
+                "value": "={{$json['Event']}}"
+              },
+              {
+                "id": "a5",
+                "name": "session_choice",
+                "type": "string",
+                "value": "={{$json['Session']}}"
+              },
+              {
+                "id": "a6",
+                "name": "participant_id",
+                "type": "string",
+                "value": "={{$json['Email'].toLowerCase().trim()}}-{{$json['Event']}}"
+              },
+              {
+                "id": "a7",
+                "name": "registered_at",
+                "type": "string",
+                "value": "={{$now.toISO()}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "05399a81-f9e9-417d-aaec-7ac7c923ecca",
+        "name": "Normalize Participant Data",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -672,
+          -16
+        ]
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg",
+            "mode": "list",
+            "cachedResultName": "Master DB",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 1504097949,
+            "mode": "list",
+            "cachedResultName": "Participants",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit#gid=1504097949"
+          },
+          "filtersUI": {
+            "values": [
+              {
+                "lookupColumn": "participant_id",
+                "lookupValue": "=={{$json.participant_id}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "c6308bbb-9e0d-4d00-b89c-611e3a52d9ee",
+        "name": "Check Duplicate Registration",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          -464,
+          -16
+        ],
+        "alwaysOutputData": true,
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "GL0ghGche8rSIuhp",
+            "name": "Google Sheets account"
+          }
+        },
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "c1",
+                "leftValue": "={{$json.participant_id}}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "6800b4d4-f6b9-4482-b377-4dba17e9c6ec",
+        "name": "IF Already Registered?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -240,
+          -16
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg",
+            "mode": "list",
+            "cachedResultName": "Master DB",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "Participants",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "participant_id": "={{$('Normalize Participant Data').item.json.participant_id}}",
+              "full_name": "={{$('Normalize Participant Data').item.json.full_name}}",
+              "email": "={{$('Normalize Participant Data').item.json.email}}",
+              "phone": "={{$('Normalize Participant Data').item.json.phone}}",
+              "event_id": "={{$('Normalize Participant Data').item.json.event_id}}",
+              "session_choice": "={{$('Normalize Participant Data').item.json.session_choice}}",
+              "registered_at": "={{$('Normalize Participant Data').item.json.registered_at}}",
+              "attendance": "false",
+              "certificate_sent": "false"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "participant_id",
+                "displayName": "participant_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "full_name",
+                "displayName": "full_name",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "email",
+                "displayName": "email",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "phone",
+                "displayName": "phone",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "event_id",
+                "displayName": "event_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "session_choice",
+                "displayName": "session_choice",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "registered_at",
+                "displayName": "registered_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "attendance",
+                "displayName": "attendance",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "checkin_time",
+                "displayName": "checkin_time",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "reminder_sent",
+                "displayName": "reminder_sent",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "certificate_sent",
+                "displayName": "certificate_sent",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "id": "a926b2b9-8441-4a15-a447-d91c4d282670",
+        "name": "Save New Participant",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          -16,
+          -112
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "GL0ghGche8rSIuhp",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "url": "=https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://keshavkhajuria.app.n8n.cloud/webhook/event-checkin?participant_id={{$('Normalize Participant Data').item.json.participant_id}}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          }
+        },
+        "id": "19ef1545-b2dc-4f2a-bed0-bbdfb4860071",
+        "name": "Generate QR Code",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          208,
+          -112
+        ]
+      },
+      {
+        "parameters": {
+          "name": "==qr_{{$('Normalize Participant Data').item.json.participant_id}}.png",
+          "driveId": {
+            "__rl": true,
+            "value": "My Drive",
+            "mode": "list",
+            "cachedResultName": "My Drive",
+            "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "value": "https://drive.google.com/drive/folders/1bSsvtOeNHZxGdNFzp36JiT81M6jInZ4T",
+            "mode": "url"
+          },
+          "options": {}
+        },
+        "id": "52ac594b-312f-425b-976e-9da2819008af",
+        "name": "Upload QR to Drive",
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3,
+        "position": [
+          432,
+          -272
+        ],
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "jF62Wb0p1EqCjsal",
+            "name": "Google Drive account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "={{$('Normalize Participant Data').item.json.email}}",
+          "subject": "=You're registered! Here's your entry QR code",
+          "message": "=Hi {{$('Normalize Participant Data').item.json.full_name}},<br><br>You're confirmed for {{$('Normalize Participant Data').item.json.event_id}} ({{$('Normalize Participant Data').item.json.session_choice}}).<br>Please bring the attached QR code for check-in at the venue.<br><br>See you there!",
+          "options": {
+            "attachmentsUi": {
+              "attachmentsBinary": [
+                {}
+              ]
+            }
+          }
+        },
+        "id": "8c86c3eb-c5ee-4071-91c1-da164ac431b2",
+        "name": "Send Confirmation Email",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          448,
+          48
+        ],
+        "webhookId": "32afeb2a-f5e6-4dce-b0ef-6a1a4d3050c4",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "wsbNRgDktILX02bM",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {},
+        "id": "34588645-8f4a-432b-af9c-820db99933b1",
+        "name": "Log Duplicate (No-Op)",
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1,
+        "position": [
+          -16,
+          96
+        ]
+      }
+    ],
+    "connections": {
+      "New Registration (Google Sheets Trigger)": {
+        "main": [
+          [
+            {
+              "node": "Normalize Participant Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalize Participant Data": {
+        "main": [
+          [
+            {
+              "node": "Check Duplicate Registration",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Duplicate Registration": {
+        "main": [
+          [
+            {
+              "node": "IF Already Registered?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF Already Registered?": {
+        "main": [
+          [
+            {
+              "node": "Log Duplicate (No-Op)",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Save New Participant",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Save New Participant": {
+        "main": [
+          [
+            {
+              "node": "Generate QR Code",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate QR Code": {
+        "main": [
+          [
+            {
+              "node": "Upload QR to Drive",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Send Confirmation Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Upload QR to Drive": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true,
+      "instanceId": "80a18fb6c2488f0df525cd2aff4ed2775845fb6c0a00bf935d40526e0f9fd7ef"
+    }
+  }

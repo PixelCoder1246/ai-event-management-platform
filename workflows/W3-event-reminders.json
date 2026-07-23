@@ -1,0 +1,475 @@
+{
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes"
+              }
+            ]
+          }
+        },
+        "id": "de23a0e8-ab7a-47e5-8736-c9372100c5a0",
+        "name": "Hourly Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -1312,
+          -16
+        ]
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg",
+            "mode": "list",
+            "cachedResultName": "Master DB",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 369914943,
+            "mode": "list",
+            "cachedResultName": "Sessions",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit#gid=369914943"
+          },
+          "options": {}
+        },
+        "id": "c89dee29-84b6-4284-ab61-e66eda16fb12",
+        "name": "Read Upcoming Sessions",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          -1088,
+          -16
+        ],
+        "alwaysOutputData": true,
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "GL0ghGche8rSIuhp",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "c1",
+                "leftValue": "={{ $json.session_start_hours_from_now }}",
+                "rightValue": 24,
+                "operator": {
+                  "type": "number",
+                  "operation": "lte"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "bb92f0d7-3a68-4332-8838-22fc802e05e6",
+        "name": "Filter Sessions Within Reminder Window",
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2,
+        "position": [
+          -864,
+          -16
+        ]
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg",
+            "mode": "list",
+            "cachedResultName": "Master DB",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 1504097949,
+            "mode": "list",
+            "cachedResultName": "Participants",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit#gid=1504097949"
+          },
+          "filtersUI": {
+            "values": [
+              {
+                "lookupColumn": "session_choice",
+                "lookupValue": "={{$json.session_id}}"
+              },
+              {
+                "lookupColumn": "reminder_sent",
+                "lookupValue": "false"
+              }
+            ]
+          },
+          "options": {
+            "returnFirstMatch": false
+          }
+        },
+        "id": "2c358ec0-d0be-4383-b8ad-a7dcf471477d",
+        "name": "Get Registered Participants",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          -656,
+          -16
+        ],
+        "alwaysOutputData": false,
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "GL0ghGche8rSIuhp",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "batchSize": 10,
+          "options": {}
+        },
+        "id": "ba749bd9-3813-4070-9070-58cc5c97774d",
+        "name": "Loop Over Participants",
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          -448,
+          -96
+        ]
+      },
+      {
+        "parameters": {
+          "sendTo": "={{$json.email}}",
+          "subject": "=Reminder: your session starts soon",
+          "message": "=Hi {{$json.full_name}},<br><br>This is a reminder that your session \"{{$json.session_choice}}\" starts within 24 hours.<br>Don't forget to bring your QR code for check-in.<br><br>See you there!",
+          "options": {}
+        },
+        "id": "99db6b93-59bd-4639-bf9d-9d70563bdb5d",
+        "name": "Send Reminder Email",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          -208,
+          -80
+        ],
+        "webhookId": "ebfff162-3ea4-416a-9e23-db5e016d12a3",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "wsbNRgDktILX02bM",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "amount": 2
+        },
+        "id": "a6254712-5cfc-4e1c-9c20-2df7abb38871",
+        "name": "Wait (Rate Limit Guard)",
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          16,
+          -80
+        ],
+        "webhookId": "62afc937-cfad-4b99-a7e9-c7b9ce274a86"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "documentId": {
+            "__rl": true,
+            "value": "1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg",
+            "mode": "list",
+            "cachedResultName": "Master DB",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 1504097949,
+            "mode": "list",
+            "cachedResultName": "Participants",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HoXdlFAP-2pVzSceZpdHajIzHyinq2--OokoLfGKOTg/edit#gid=1504097949"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "participant_id": "={{$('Get Registered Participants').item.json.participant_id}}",
+              "reminder_sent": "true",
+              "row_number": 0
+            },
+            "matchingColumns": [
+              "participant_id"
+            ],
+            "schema": [
+              {
+                "id": "participant_id",
+                "displayName": "participant_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "full_name",
+                "displayName": "full_name",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "email",
+                "displayName": "email",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "phone",
+                "displayName": "phone",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "event_id",
+                "displayName": "event_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "session_choice",
+                "displayName": "session_choice",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "registered_at",
+                "displayName": "registered_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "attendance",
+                "displayName": "attendance",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "checkin_time",
+                "displayName": "checkin_time",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "reminder_sent",
+                "displayName": "reminder_sent",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "certificate_sent",
+                "displayName": "certificate_sent",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "row_number",
+                "displayName": "row_number",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "readOnly": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "id": "be211396-b49f-4dcb-816d-38060612be69",
+        "name": "Mark Reminder Sent",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          240,
+          -80
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "GL0ghGche8rSIuhp",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          -1312,
+          192
+        ],
+        "id": "8f7c7ac5-1544-4e84-92c0-c622ff65b1c9",
+        "name": "When clicking ‘Execute workflow’"
+      }
+    ],
+    "connections": {
+      "Hourly Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Read Upcoming Sessions",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Upcoming Sessions": {
+        "main": [
+          [
+            {
+              "node": "Filter Sessions Within Reminder Window",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter Sessions Within Reminder Window": {
+        "main": [
+          [
+            {
+              "node": "Get Registered Participants",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Registered Participants": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Participants",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Over Participants": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Send Reminder Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Reminder Email": {
+        "main": [
+          [
+            {
+              "node": "Wait (Rate Limit Guard)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Wait (Rate Limit Guard)": {
+        "main": [
+          [
+            {
+              "node": "Mark Reminder Sent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mark Reminder Sent": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Participants",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "When clicking ‘Execute workflow’": {
+        "main": [
+          [
+            {
+              "node": "Read Upcoming Sessions",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true,
+      "instanceId": "80a18fb6c2488f0df525cd2aff4ed2775845fb6c0a00bf935d40526e0f9fd7ef"
+    }
+  }
