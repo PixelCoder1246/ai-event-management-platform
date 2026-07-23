@@ -2,7 +2,7 @@
 
 An end-to-end event lifecycle automation platform built entirely on **n8n**, covering registration, QR-based attendance, automated reminders, certificate generation, and AI-driven feedback analytics — with zero manual spreadsheet work once configured.
 
-Built as a capstone project for **Summer School '26 — N8N Capstone Project** (Assignment 7: AI Event Management Platform).
+Built as a capstone project for **Summer School '26 — N8N Capstone Project** (AI Event Management Platform).
 
 ---
 
@@ -20,15 +20,15 @@ The system uses a hub-and-spoke model: every workflow reads from and writes to a
 
 ![Architecture Diagram](docs/architecture-diagram.png)
 
-See [`docs/02-workflow-documentation.md`](docs/02-workflow-documentation.md) for the full interaction diagram and event-flow timeline.
+See [`docs/02-workflow-documentation.md`](docs/02-Workflow-Documentation.md) for the full interaction diagram and event-flow timeline.
 
-| Workflow | Trigger | Purpose |
-|---|---|---|
-| **W1 — Registration & Participant Management** | New row in Registration sheet | Validates + de-duplicates sign-ups, generates a QR code, emails confirmation |
-| **W2 — QR Attendance Check-in** | Webhook (QR scan) | Verifies scanned code, marks attendance, blocks duplicate check-ins |
-| **W3 — Event Reminders** | Hourly schedule (cron) | Emails session reminders 24h ahead, once per participant |
-| **W4 — Certificate Generation & Distribution** | Webhook (organizer-triggered) | Generates a personalized PDF certificate per attendee via PDFMonkey, emails it |
-| **W5 — Feedback & Analytics** | New feedback row + weekly schedule | AI-tags feedback sentiment/theme; emails organizers a weekly AI-written summary |
+| Workflow                                       | Trigger                            | Purpose                                                                         |
+| ---------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------- |
+| **W1 — Registration & Participant Management** | New row in Registration sheet      | Validates + de-duplicates sign-ups, generates a QR code, emails confirmation    |
+| **W2 — QR Attendance Check-in**                | Webhook (QR scan)                  | Verifies scanned code, marks attendance, blocks duplicate check-ins             |
+| **W3 — Event Reminders**                       | Hourly schedule (cron)             | Emails session reminders 24h ahead, once per participant                        |
+| **W4 — Certificate Generation & Distribution** | Webhook (organizer-triggered)      | Generates a personalized PDF certificate per attendee via PDFMonkey, emails it  |
+| **W5 — Feedback & Analytics**                  | New feedback row + weekly schedule | AI-tags feedback sentiment/theme; emails organizers a weekly AI-written summary |
 
 ---
 
@@ -67,6 +67,7 @@ See [`docs/02-workflow-documentation.md`](docs/02-workflow-documentation.md) for
 ## Setup
 
 ### Prerequisites
+
 - An [n8n](https://n8n.io) instance (cloud or self-hosted)
 - A Google account with access to Sheets, Drive, and Gmail
 - A [PDFMonkey](https://www.pdfmonkey.io) account with an API key and a certificate template
@@ -74,7 +75,7 @@ See [`docs/02-workflow-documentation.md`](docs/02-workflow-documentation.md) for
 
 ### Steps
 
-1. **Set up the Master DB spreadsheet** with tabs: `Registration`, `Participants`, `Sessions`, `Audit Log`, `Feedback`, `Feedback Form Responses`, matching the column schema documented in [`docs/02-workflow-documentation.md`](docs/02-workflow-documentation.md).
+1. **Set up the Master DB spreadsheet** with tabs: `Registration`, `Participants`, `Sessions`, `Audit Log`, `Feedback`, `Feedback Form Responses`, matching the column schema documented in [`docs/02-workflow-documentation.md`](docs/02-Workflow-Documentation.md).
 
 2. **Import each workflow** into your n8n instance:
    - n8n → **Workflows** → **Add workflow** → **Import from File** → select each `.json` from `/workflows`.
@@ -107,8 +108,8 @@ See [`docs/02-workflow-documentation.md`](docs/02-workflow-documentation.md) for
 
 ## Documentation
 
-- [Problem Analysis](docs/01-problem-analysis.md) — business context, stakeholders, pain points, objectives
-- [Workflow Documentation](docs/02-workflow-documentation.md) — full node-by-node breakdown, schema reference, and rubric cross-reference for all 5 workflows
+- [Problem Analysis](docs/01-Problem-Analysis.md) — business context, stakeholders, pain points, objectives
+- [Workflow Documentation](docs/02-Workflow-Documentation.md) — full node-by-node breakdown, schema reference, and rubric cross-reference for all 5 workflows
 
 ## Demo
 
